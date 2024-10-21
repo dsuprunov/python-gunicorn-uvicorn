@@ -1,0 +1,12 @@
+services:
+  python-gunicorn-uvicorn-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: python-gunicorn-uvicorn-app
+    container_name: python-gunicorn-uvicorn-app
+    restart: unless-stopped
+    volumes:
+      - ./src:/app/src
+    ports:
+      - 8000:8000

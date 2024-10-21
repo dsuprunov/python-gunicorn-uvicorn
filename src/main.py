@@ -7,9 +7,9 @@ app = FastAPI()
 
 
 @app.get("/")
-def index():
+async def index():
     return {
-        "now": pendulum.now(tz='UTC').format('YYYY-MM-DD HH:mm:ss z')
+        "now": pendulum.now(tz='UTC').format('YYYY-MM-DD HH:mm:ss z'),
     }
 
 
