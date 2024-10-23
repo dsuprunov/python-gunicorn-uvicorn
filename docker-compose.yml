@@ -6,7 +6,7 @@ services:
     image: python-gunicorn-uvicorn-app
     container_name: python-gunicorn-uvicorn-app
     restart: unless-stopped
-    volumes:
-      - ./src:/app/src
+#    volumes:
+#      - ./src:/app/src
     ports:
       - 8000:8000

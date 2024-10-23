@@ -9,7 +9,7 @@ app = FastAPI()
 @app.get("/")
 async def index():
     return {
-        "now": pendulum.now(tz='UTC').format('YYYY-MM-DD HH:mm:ss z'),
+        "timestamp": pendulum.now(tz='UTC').format('YYYY-MM-DD HH:mm:ss z'),
     }
 
 

@@ -31,4 +31,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY --from=builder /app ./
 
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+WORKDIR /app/src
+
+CMD ["gunicorn", "main:app", "--workers", "3", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
