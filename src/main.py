@@ -3,7 +3,10 @@ import pendulum
 import uvicorn
 
 from core import settings
-from core.gunicorn import Application
+from core.gunicorn import (
+    Application,
+    Logger,
+)
 
 app = FastAPI()
 
@@ -32,6 +35,10 @@ def run_with_gunicorn():
             'workers': settings.service.workers,
             'timeout': settings.service.timeout,
             'worker_class': 'uvicorn.workers.UvicornWorker',
+            "accesslog": settings.service.accesslog,
+            "errorlog": settings.service.errorlog,
+            'loglevel': settings.logging.level,
+            'logger_class': Logger,
         }
     ).run()
 
