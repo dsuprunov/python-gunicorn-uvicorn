@@ -3,17 +3,20 @@ ARG POETRY_VERSION=1.8.4
 
 FROM python:${PYTHON_VERSION}
 
-ARG POETRY_VERSION
-
 ENV PATH="/root/.local/bin:${PATH}" \
     #
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH="/app/src"
+    PYTHONPATH="/home/app/src"
 
 RUN pip install --no-cache-dir --timeout=100 poetry
 
-WORKDIR /app
+RUN addgroup --system nonroot                   && \
+    adduser  --system --ingroup nonroot nonroot && \
+    mkdir -p /home/app                          && \
+    chown -R nonroot:nonroot /home/app/
+
+WORKDIR /home/app
 
 COPY pyproject.toml poetry.lock ./
 
@@ -24,6 +27,8 @@ COPY . .
 
 RUN poetry run pytest -v --color=no --tb=line
 
-WORKDIR /app/src
+WORKDIR /home/app/src
+
+USER nonroot
 
 CMD ["poetry", "run", "python", "main.py"]
