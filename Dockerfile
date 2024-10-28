@@ -1,20 +1,19 @@
 ARG PYTHON_VERSION=3.12-slim
 ARG POETRY_VERSION=1.8.4
 
-FROM python:${PYTHON_VERSION}
+FROM python:${PYTHON_VERSION} AS builder
 
-ENV PATH="/root/.local/bin:${PATH}" \
-    #
+ARG POETRY_VERSION
+
+ENV PYTHONPATH="/home/app/src" \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONPATH="/home/app/src"
+    PIP_DEFAULT_TIMEOUT=100 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PIP_NO_CACHE_DIR=off
 
-RUN pip install --no-cache-dir --timeout=100 poetry
-
-RUN addgroup --system nonroot                   && \
-    adduser  --system --ingroup nonroot nonroot && \
-    mkdir -p /home/app                          && \
-    chown -R nonroot:nonroot /home/app/
+RUN python -m pip install --upgrade pip && \
+    python -m pip install poetry==${POETRY_VERSION}
 
 WORKDIR /home/app
 
@@ -27,8 +26,23 @@ COPY . .
 
 RUN poetry run pytest -v --color=no --tb=line
 
-WORKDIR /home/app/src
+RUN poetry export --only main --without-hashes -f requirements.txt --output requirements.txt
 
-USER nonroot
+FROM python:${PYTHON_VERSION}
 
-CMD ["poetry", "run", "python", "main.py"]
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_DEFAULT_TIMEOUT=100 \
+    PIP_ROOT_USER_ACTION=ignore \
+    PIP_NO_CACHE_DIR=off
+
+WORKDIR /home/app/
+
+COPY --from=builder /home/app/requirements.txt .
+
+RUN python -m pip install --upgrade pip && \
+    python -m pip install -r requirements.txt
+
+COPY ./src ./src
+
+CMD ["python", "src/main.py"]
